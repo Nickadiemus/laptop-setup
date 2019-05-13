@@ -24,26 +24,52 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
 
+# Installs Prerequisites for setup
 install_prerequisites () {
   # Xcode Command Line Tool Installation
   xcode-select --install
 }
 
+# Installs Homebrew
 install_brew () {
   # starts brew install
   /usr/bin/ruby -e "$(curl -fsSL $HOMEBREW)"
-
   # redundent check
   brew doctor
+}
+
+install_basic () {
+  echo "basic install"
+}
+
+install_custom () {
+  echo "Custom install"
 }
 
 startup () {
   clear
   echo "$Green Starting Setup... $Color_Off"
-  install_prerequisites
-  install_brew
-
-
+  # install_prerequisites
+  # install_brew
+  echo 'Would you like to proceed with the basic(b) or custom(c) install?
+  Basic   Install   (b)
+  Custom  Install   (c)
+  Exit              (exit)'
+  read -p "$USER:" installchoice
+  if [ $installch == "b" ]; then
+    install_basic
+  elif [ $installch == "c" ]; then
+    install_custom
+  elif [ $installch == "exit" ]; then
+    clear
+    exit
+  else
+    echo -e "$Red"
+    echo -e "Invalid Choice $Color_Off"
+    sleep 1
+    startup
+  fi
+  # install_basic
 }
 
 startup
