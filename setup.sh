@@ -24,6 +24,16 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
 
+brew_install () {
+  echo "$Purple Installing $1...$Color_Off"
+  brew install $1
+}
+
+brew_cask_install () {
+  echo "$Purple Installing $1...$Color_Off"
+  brew cask install $1
+}
+
 # Installs Prerequisites for setup
 install_prerequisites () {
   # Xcode Command Line Tool Installation
@@ -39,11 +49,51 @@ install_brew () {
 }
 
 install_basic () {
-  echo "basic install"
+  echo "$Green Starting Install of Applications... $Color_Off"
+  brew_cask_install google-chrome
+  brew_cask_install firefox
+  brew_cask_install iterm2
+  brew_cask_install atom
+  brew_cask_install adobe-creative-cloud
+  brew_cask_install telegram
+  brew_cask_install spotify
+  brew_cask_install vlc
+  brew_cask_install sequel-pro
+  
+
+
+  # Prgramming Languages
+  echo "$Green Starting Install of Programming Languages... $Color_Off"
+  brew_install "ruby"
+  brew_install "python2"
+  brew_install "python3"
+  brew_cask_install "java"
+
+  # Package Managers
+  echo "$Green Starting Install of Package Managers... $Color_Off"
+  brew_install "git"
+  brew_install "yarn"
+  brew_install "node"
+
+  # Databases
+  echo "$Green Starting Install of Package Managers... $Color_Off"
+  brew_install "mysql"
+  brew tap homebrew/services 
+  brew services start mysql 
+  brew_install "postgresql"
+  brew_install "mongodb"
+
+}
+# Installs Basic Brew Utilities
+install_brew_utils () {
+  brew_install "cask"
+  brew_install "wget"
+  brew_install "nmap"
+
 }
 
 install_custom () {
-  echo "Custom install"
+  echo "Custom Install"
 }
 
 startup () {
@@ -51,21 +101,22 @@ startup () {
   echo "$Green Starting Setup... $Color_Off"
   # install_prerequisites
   # install_brew
+  # install_brew_utils
   echo 'Would you like to proceed with the basic(b) or custom(c) install?
   Basic   Install   (b)
   Custom  Install   (c)
   Exit              (exit)'
-  read -p "$USER:" installchoice
-  if [ $installch == "b" ]; then
+  read -p "$USER: " installchoice
+
+  if [ $installchoice == "b" ]; then
     install_basic
-  elif [ $installch == "c" ]; then
+  elif [ $installchoice == "c" ]; then
     install_custom
-  elif [ $installch == "exit" ]; then
+  elif [ $installchoice == "exit" ]; then
     clear
     exit
   else
-    echo -e "$Red"
-    echo -e "Invalid Choice $Color_Off"
+    echo -e "$Red Invalid Choice $Color_Off"
     sleep 1
     startup
   fi
