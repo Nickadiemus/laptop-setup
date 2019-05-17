@@ -1,0 +1,8 @@
+{
+  "cask":{
+    "applications":["google-chrome", "firefox", "iterm2", "atom"]
+  },
+  "brew":{
+    "formulas":["ruby", "python2", "python3", "java"]
+  }
+}
