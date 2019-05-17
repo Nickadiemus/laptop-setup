@@ -23,6 +23,8 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 # Paths
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
+CONFIG="../custom.config.json"
+source ../config.data.sh
 
 brew_install () {
   echo "$Purple Installing $1...$Color_Off"
@@ -50,55 +52,33 @@ install_brew () {
 
 install_basic () {
   clear
-  echo "$Green Starting Install of Applications... $Color_Off"
-  brew_cask_install google-chrome
-  brew_cask_install firefox
-  brew_cask_install iterm2
-  brew_cask_install atom
-  brew_cask_install adobe-creative-cloud
-  brew_cask_install telegram
-  brew_cask_install spotify
-  brew_cask_install vlc
-  brew_cask_install sequel-pro
-
-
-
-  # Prgramming Languages
-  clear
-  echo "$Green Starting Install of Programming Languages... $Color_Off"
-  brew_install "ruby"
-  brew_install "python2"
-  brew_install "python3"
-  brew_cask_install "java"
-
-  # Package Managers
-  clear
-  echo "$Green Starting Install of Package Managers... $Color_Off"
-  brew_install "git"
-  brew_install "yarn"
-  brew_install "node"
-
-  # Databases
-  echo "$Green Starting Install of Package Managers... $Color_Off"
-  brew_install "mysql"
-  brew tap homebrew/services 
-  brew services start mysql 
-  brew_install "postgresql"
-  brew_install "mongodb"
-
-}
-
-install_custom () {
-  echo "Custom Install"
-  source ../config.data.sh
-  load_configs
-  LENGTH=$(cat custom.config.json | jq '.brew .formulas' | jq 'length')
+  load_basic_data
+  LENGTH=$(cat $CONFIG | jq '.basic .formulas' | jq 'length')
   for (( k = 0; k < $LENGTH; k++ )); do
-    brew_install ${BREW[$k]}
+    brew_install ${BREWB[$k]}
   done
 
-
+  LENGTH=$(cat $CONFIG | jq '.basic .applications' | jq 'length')
+  for (( l = 0; l < $LENGTH; l++ )); do
+    brew_cask_install ${CASKB[$l]}
+  done
 }
+
+
+install_custom () {
+  clear
+  load_custom_data
+  LENGTH=$(cat $CONFIG | jq '.brew .formulas' | jq 'length')
+  for (( k = 0; k < $LENGTH; k++ )); do
+    brew_install ${BREWC[$k]}
+  done
+
+  LENGTH=$(cat $CONFIG | jq '.cask .applications' | jq 'length')
+  for (( l = 0; l < $LENGTH; l++ )); do
+    brew_cask_install ${CASKC[$l]}
+  done
+}
+
 # Installs Basic Brew Utilities
 install_brew_utils () {
   brew_install "cask"
@@ -113,7 +93,7 @@ startup () {
   echo "$Green Starting Setup... $Color_Off"
   # install_prerequisites
   # install_brew
-  # install_brew_utils
+  install_brew_utils
   echo 'What would you like to proceed with?
 Basic   Install   (b)
 Custom  Install   (c)

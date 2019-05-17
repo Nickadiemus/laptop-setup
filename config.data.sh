@@ -1,28 +1,49 @@
 #!/bin/bash
-BREW=()
-CASK=()
+BREWC=()
+CASKC=()
+BREWC=()
+CASKB=()
+
 
 load_cask () {
-  LENGTH=$(cat custom.config.json | jq '.cask .applications' | jq 'length')
-  data=$(cat custom.config.json | jq '.cask .applications')
+  data=$(cat ../custom.config.json | jq '.cask .applications')
   data=${data// /}
   data=${data//,/}
   data=${data##[}
   data=${data%]}
-  eval CASK=($data)
+  eval CASKC=($data)
 }
 
 load_brew () {
-  LENGTH=$(cat custom.config.json | jq '.brew .formulas' | jq 'length')
-  data=$(cat custom.config.json | jq '.brew .formulas')
+  data=$(cat ../custom.config.json | jq '.brew .formulas')
   data=${data// /}
   data=${data//,/}
   data=${data##[}
   data=${data%]}
-  eval BREW=($data)
+  eval BREWC=($data)
 }
 
-load_configs () {
+load_basic () {
+  data=$(cat ../custom.config.json | jq '.basic .applications')
+  data=${data// /}
+  data=${data//,/}
+  data=${data##[}
+  data=${data%]}
+  eval CASKB=($data)
+
+  data=$(cat ../custom.config.json | jq '.basic .formulas')
+  data=${data// /}
+  data=${data//,/}
+  data=${data##[}
+  data=${data%]}
+  eval BREWB=($data)
+}
+
+load_custom_data () {
   load_brew
   load_cask
+}
+
+load_basic_data () {
+  load_basic
 }
