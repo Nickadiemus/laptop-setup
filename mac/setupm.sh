@@ -23,7 +23,6 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 # Paths
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
-CONFIG="./config/custom"
 
 brew_install () {
   echo "$Purple Installing $1...$Color_Off"
