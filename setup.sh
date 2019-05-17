@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Welcome to my personal laptop setup
 # This is a simple script that will install basic utilities for your laptop (or Desktop)
@@ -23,6 +23,7 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 # Paths
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
+CONFIG="./config/custom"
 
 brew_install () {
   echo "$Purple Installing $1...$Color_Off"
@@ -49,6 +50,7 @@ install_brew () {
 }
 
 install_basic () {
+  clear
   echo "$Green Starting Install of Applications... $Color_Off"
   brew_cask_install google-chrome
   brew_cask_install firefox
@@ -59,10 +61,11 @@ install_basic () {
   brew_cask_install spotify
   brew_cask_install vlc
   brew_cask_install sequel-pro
-  
+
 
 
   # Prgramming Languages
+  clear
   echo "$Green Starting Install of Programming Languages... $Color_Off"
   brew_install "ruby"
   brew_install "python2"
@@ -70,6 +73,7 @@ install_basic () {
   brew_cask_install "java"
 
   # Package Managers
+  clear
   echo "$Green Starting Install of Package Managers... $Color_Off"
   brew_install "git"
   brew_install "yarn"
@@ -84,17 +88,26 @@ install_basic () {
   brew_install "mongodb"
 
 }
+
+install_custom () {
+  echo "Custom Install"
+  source ./config.data.sh
+  load_configs
+  LENGTH=$(cat custom.config.json | jq '.brew .formulas' | jq 'length')
+  for (( k = 0; k < $LENGTH; k++ )); do
+    brew_install ${BREW[$k]}
+  done
+
+
+}
 # Installs Basic Brew Utilities
 install_brew_utils () {
   brew_install "cask"
   brew_install "wget"
   brew_install "nmap"
-
+  brew_install "jq"
 }
 
-install_custom () {
-  echo "Custom Install"
-}
 
 startup () {
   clear
@@ -102,10 +115,10 @@ startup () {
   # install_prerequisites
   # install_brew
   # install_brew_utils
-  echo 'Would you like to proceed with the basic(b) or custom(c) install?
-  Basic   Install   (b)
-  Custom  Install   (c)
-  Exit              (exit)'
+  echo 'What would you like to proceed with?
+Basic   Install   (b)
+Custom  Install   (c)
+Exit              (exit)'
   read -p "$USER: " installchoice
 
   if [ $installchoice == "b" ]; then
