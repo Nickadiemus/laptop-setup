@@ -91,7 +91,7 @@ install_basic () {
 
 install_custom () {
   echo "Custom Install"
-  source ./config.data.sh
+  source ../config.data.sh
   load_configs
   LENGTH=$(cat custom.config.json | jq '.brew .formulas' | jq 'length')
   for (( k = 0; k < $LENGTH; k++ )); do
