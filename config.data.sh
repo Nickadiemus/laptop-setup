@@ -1,49 +1,32 @@
 #!/bin/bash
-BREWC=()
-CASKC=()
-BREWC=()
-CASKB=()
 
+# Vars
+CONFIGPATH=../custom.config.json
+ARR_VARS=(UTILS BREWC CASKC BREWB CASKB)
+DELIMITER=","
+UTILS=$(cat $CONFIGPATH | jq -c '.utils' | tr -d '[]')
+BREWC=$(cat $CONFIGPATH | jq -c '.brew .formulas' | tr -d '[]')
+CASKC=$(cat $CONFIGPATH | jq -c '.cask .applications' | tr -d '[]')
+BREWB=$(cat $CONFIGPATH | jq -c '.basic .formulas' | tr -d '[]')
+CASKB=$(cat $CONFIGPATH | jq -c '.basic .applications' | tr -d '[]')
 
-load_cask () {
-  data=$(cat ../custom.config.json | jq '.cask .applications')
-  data=${data// /}
-  data=${data//,/}
-  data=${data##[}
-  data=${data%]}
-  eval CASKC=($data)
+# Helper function
+array_delimiter () {
+  local IFS=$2        #delimiter
+  eval $1\=\(${!1}\)
 }
 
-load_brew () {
-  data=$(cat ../custom.config.json | jq '.brew .formulas')
-  data=${data// /}
-  data=${data//,/}
-  data=${data##[}
-  data=${data%]}
-  eval BREWC=($data)
+# creates the custom config arrays
+fetch_data () {
+  for var in "${ARR_VARS[@]}"; do
+    array_delimiter $var $DELIMITER
+  done
 }
 
-load_basic () {
-  data=$(cat ../custom.config.json | jq '.basic .applications')
-  data=${data// /}
-  data=${data//,/}
-  data=${data##[}
-  data=${data%]}
-  eval CASKB=($data)
-
-  data=$(cat ../custom.config.json | jq '.basic .formulas')
-  data=${data// /}
-  data=${data//,/}
-  data=${data##[}
-  data=${data%]}
-  eval BREWB=($data)
-}
-
-load_custom_data () {
-  load_brew
-  load_cask
-}
-
-load_basic_data () {
-  load_basic
+# Debug Function
+print_arr () {
+  arr=("$@")
+  for item in "${arr[@]}"; do
+    echo $item
+  done
 }

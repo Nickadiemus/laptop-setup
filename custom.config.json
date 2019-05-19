@@ -8,5 +8,6 @@
   "basic":{
     "applications": ["google-chrome", "firefox", "iterm2", "atom", "adobe-creative-cloud", "telegram", "spotify", "vlc", "sequel-pro", "java"],
     "formulas": ["ruby", "python2", "python3", "git", "yarn", "node", "mysql", "postgresql", "mongodb"]
-  }
+  },
+  "utils": ["cask","wget","nmap"]
 }

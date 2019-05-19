@@ -24,13 +24,18 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
 CONFIG="../custom.config.json"
-source ../config.data.sh
+DATA="../config.data.sh"
+# Vars
+REQUIRED_UTILS=(cask jq wget)
 
+
+# Helper function for formula installs
 brew_install () {
   echo "$Purple Installing $1...$Color_Off"
   brew install $1
 }
 
+# Helper function for cask installs
 brew_cask_install () {
   echo "$Purple Installing $1...$Color_Off"
   brew cask install $1
@@ -50,69 +55,121 @@ install_brew () {
   brew doctor
 }
 
+# Installs basic repositories
 install_basic () {
   clear
-  load_basic_data
-  LENGTH=$(cat $CONFIG | jq '.basic .formulas' | jq 'length')
-  for (( k = 0; k < $LENGTH; k++ )); do
-    brew_install ${BREWB[$k]}
+  echo "$GREEN Starting Basic Install...$Color_Off"
+  for cask in "${CASKB[@]}"; do
+    brew_cask_install $cask
   done
 
-  LENGTH=$(cat $CONFIG | jq '.basic .applications' | jq 'length')
-  for (( l = 0; l < $LENGTH; l++ )); do
-    brew_cask_install ${CASKB[$l]}
+  for formula in "${BREWB[@]}"; do
+    brew_install $formula
   done
+  brew_clean
+  echo "$GREEN Done $Color_Off"
+  exit
 }
 
-
+# Installs custom configured repositories
 install_custom () {
   clear
   load_custom_data
-  LENGTH=$(cat $CONFIG | jq '.brew .formulas' | jq 'length')
-  for (( k = 0; k < $LENGTH; k++ )); do
-    brew_install ${BREWC[$k]}
+  echo "$GREEN Starting Custom Install...$Color_Off"
+  for cask in "${CASKC[@]}"; do
+    brew_cask_install $cask
   done
 
-  LENGTH=$(cat $CONFIG | jq '.cask .applications' | jq 'length')
-  for (( l = 0; l < $LENGTH; l++ )); do
-    brew_cask_install ${CASKC[$l]}
+  for formula in "${BREWC[@]}"; do
+    brew_install $formula
   done
+  clean_brew
+  echo "$GREEN Done $Color_Off"
+  exit
 }
 
-# Installs Basic Brew Utilities
-install_brew_utils () {
-  brew_install "cask"
-  brew_install "wget"
-  brew_install "nmap"
-  brew_install "jq"
+# Installs Basic Brew Utilities used for setup
+install_utils () {
+    echo "t"
+}
+
+# Updates Homebrew
+brew_update () {
+  brew update
+  brew outdated
+  brew upgrade
+}
+
+# Cleans up old version of a formula
+brew_clean () {
+  echo "$Green Cleaning Dependencies $Color_Off"
+  brew cleanup -n
+  read -p "$(echo "$Green These are all the old formulas that would be clean. Would you like to continue? (y/n): $Color_Off")" uinput
+  if [ $uinput == "y" ] || [ $uinput == "Y" ] || [ $uinput == "yes" ]; then
+    brew cleanup
+  fi
+}
+
+# Checks if the user already has required formulas
+check_depend () {
+  if [ $1 == "1" ]; then
+    echo "Checking for dependencies..."
+    for u in "${REQUIRED_UTILS[@]}"; do
+      if [ -f "/usr/local/bin/$u" ]; then
+        echo "$GREEN $u - Installed $Color_Off"
+      else
+        echo "$RED $u - Not Installed $Color_Off"
+        brew_install $u
+      fi
+    done
+  else
+    for u in "${REQUIRED_UTILS[@]}"; do
+      brew_install $u
+    done
+  fi
+}
+
+prompt () {
+  clear
+  while :
+  do
+    echo "Basic\tInstall\t\t(b)\nCustom\tInstall\t\t(c)\nUnistall Homebrew\t(u)\nQuit\t\t\t(exit)"
+    read -p "What would you like to do? (PRESS ENTER): " REPLY
+    case $REPLY in
+      b) install_basic;;
+      c) install_custom;;
+      u) echo "Uninstalling Homebrew";;
+      exit) exit;;
+      *) echo "$(clear) $RED Invalid Choice - Try again $Color_Off";;
+    esac
+  done
 }
 
 
 startup () {
   clear
   echo "$Green Starting Setup... $Color_Off"
-  # install_prerequisites
-  # install_brew
-  install_brew_utils
-  echo 'What would you like to proceed with?
-Basic   Install   (b)
-Custom  Install   (c)
-Exit              (exit)'
-  read -p "$USER: " installchoice
-
-  if [ $installchoice == "b" ]; then
-    install_basic
-  elif [ $installchoice == "c" ]; then
-    install_custom
-  elif [ $installchoice == "exit" ]; then
-    clear
-    exit
-  else
-    echo -e "$Red Invalid Choice $Color_Off"
+  echo "$Green Checking for homebrew... $Color_Off"
+  sleep 1
+  # Checks if homebrew is installed
+  if [ -f "/usr/local/bin/brew" ]; then
+    echo "$Green Instance of brew is already installed. $Color_Off"
+    echo "$Green Updating/Installing formulas required for script... $Color_Off"
     sleep 1
-    startup
+    check_depend 1
+    . $DATA      # Imports helper functions
+    brew_update
+    fetch_data
+  else
+    echo "$Green Instance of homebrew not found. Installing...$Color_Off"
+    sleep 1
+    install_prerequisites
+    install_brew
+    check_depend 0
+    . $DATA      # Imports helper functions
+    fetch_data
   fi
-  # install_basic
+  prompt
 }
 
 startup
