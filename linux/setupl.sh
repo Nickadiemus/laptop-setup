@@ -24,55 +24,60 @@ GITHOMEBREW="https://github.com/Homebrew/brew/tarball/master"
 LOCAL="/usr/local"
 LBIN="/usr/local/bin"
 CONFIG="../custom.config.json"
+DATA="../config.data.sh"
 
+# Vars
+REQUIRED_UTILS=(jq wget)
 
 brew_install () {
   echo -e "$Purple Installing $1...$Color_Off"
   brew install $1
 }
 
-brew_cask_install () {
+apt_install () {
   echo -e "$Purple Installing $1...$Color_Off"
-  brew cask install $1
+  sudo apt install $1
 }
+
 
 # Installs Prerequisites for setup
 install_prerequisites () {
+
     if [ -f "/etc/os-release" ]; then
-      
+
       #Ubuntu
-      echo "DEBUG: inside /etc/os-release"
-      sudo apt-get install build-essential curl file git 
+      echo -e "DEBUG: inside /etc/os-release"
+      sudo apt-get install build-essential curl file git
       . /etc/os-release
       install_brew $NAME $VERSION_ID
-    
+
     elif [ -f "/etc/lsb-release" ]; then
-      
-      echo "DEBUG: inside /etc/lsb-release"
+
+      echo -e "DEBUG: inside /etc/lsb-release"
       #Some versions of Ubuntu/Debian without the lsb_release command
-      sudo apt-get install build-essential curl file git 
+      sudo apt-get install build-essential curl file git
       . /etc/lsb-release
       install_brew $DISTRIB_ID $DISTRIB_RELEASE
-      
+
     elif type lsb_release >/dev/null 2>&1; then
-      
+
       #Linux CentOS,Fedora, etc.
-      echo "DEBUG: inside lsb_release"
+      echo -e "DEBUG: inside lsb_release"
       sudo yum groupinstall 'Development Tools' && sudo yum install curl file git
       install_brew $(lsb_release -si) $(lsb_release -sr)
-    
-      
+
+
     elif [ -f /etc/debian_version ]; then
-      
-      echo "DEBUG: inside /etc/debian_version"
+
+      echo -e "DEBUG: inside /etc/debian_version"
       #Older versions of Ubuntu/Debian
       sudo apt-get install build-essential curl file git
       install_brew "Debian" $(cat /etc/debian_version)
-    
+
     elif [ -f /etc/redhat-release ]; then
-      
-      echo "DEBUG: inside /etc/redhat-release"
-      #Redhat  
+
+      echo -e "DEBUG: inside /etc/redhat-release"
+      #Redhat
       sudo yum groupinstall 'Development Tools' && sudo yum install curl file git
       install_brew "Redhat" ""
     else
@@ -80,102 +85,99 @@ install_prerequisites () {
     fi
 }
 
+# Updates Homebrew
+brew_update () {
+  brew update
+  brew outdated
+  brew upgrade
+}
 
 # Installs Homebrew
 install_brew () {
-  
+
   # starts brew install
-  sh -c "$(curl -fsSL $HOMEBREW)"
-  test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
-  test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-  
-  #Adds brew to PATH variable
-  if [[ "$1" = "Ubuntu" ]] || [[ "$1" = "Debian" ]]; then
-    
-    echo -e "$BLUE Adding brew to your PATH variable...$Color_Off"
-    if [ -f ~/.zshrc ]; then
-      echo "export PATH=/home/linuxbrew/.linuxbrew/Homebrew/bin:$PATH" >>~/.zshrc  && . ~/.zshrc 
-     else
-      echo "export PATH=/home/linuxbrew/.linuxbrew/Homebrew/bin:$PATH" >>~/.profile && . ~/.profile
-    fi
-  
-    
-  elif [[ "$1" = "Fedora" ]] || [[ "$1" = "CentOS" ]] || [[ "$1" = "Redhat" ]]; then
-  
-    echo -e "$BLUE Adding brew to yobbur PATH variable...$Color_Off"
-    #if you have oh-my-zsh installed
-    if [ -f ~/.zshrc ]; then
-      echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.zshrc  && . ~/.zshrc 
-    else
-      test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile && . ~/.bash_profile
-    fi
-    
-  else
-    
-    echo -e "$RED Error: 001 - brew could not be added to PATH variable.$Color_Off"
-    echo "Terminating.."
-    exit 
-    
-  fi
-  
+  # sh -c "$(curl -fsSL $HOMEBREW)"
+  # test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
+  # test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+
+  sudo apt install linuxbrew-wrapper
+  brew --help
+  #Adds brew to $PATH variable
+  # if [[ "$1" = "Ubuntu" ]] || [[ "$1" = "Debian" ]]; then
+  #
+  #   echo -e "$BLUE Adding brew to your PATH variable...$Color_Off"
+  #   if [ -f ~/.zshrc ]; then
+  #     PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+  #     echo -e "export PATH=/home/linuxbrew/.linuxbrew/Homebrew/bin:$PATH" >>~/.zshrc  && . ~/.zshrc
+  #    else
+  #      PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+  #      echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"' >>~/.zprofile
+  #      echo 'export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"' >>~/.zprofile
+  #      echo 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPATH"' >>~/.zprofile
+  #      echo -e "export PATH=/home/linuxbrew/.linuxbrew/Homebrew/bin:$PATH" >>~/.profile && . ~/.profile
+  #   fi
+  #
+  # elif [[ "$1" = "Fedora" ]] || [[ "$1" = "CentOS" ]] || [[ "$1" = "Redhat" ]]; then
+  #
+  #   echo -e "$BLUE Adding brew to yobbur PATH variable...$Color_Off"
+  #   #if you have oh-my-zsh installed
+  #   if [ -f ~/.zshrc ]; then
+  #     PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+  #     echo -e "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.zshrc  && . ~/.zshrc
+  #   else
+  #     echo 'export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"' >>~/.zprofile
+  #     echo 'export MANPATH="/home/linuxbrew/.linuxbrew/share/man:$MANPATH"' >>~/.zprofile
+  #     echo 'export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:$INFOPATH"' >>~/.zprofile
+  #     test -r ~/.bash_profile && echo -e "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile && . ~/.bash_profile
+  #   fi
+  # else
+  #
+  #   echo -e "$RED Error: 001 - brew could not be added to PATH variable.$Color_Off"
+  #   echo -e "Terminating.."
+  #   exit
+  # fi
+
   brew doctor
+}
+
+# Cleans up old version of a formula
+brew_clean () {
+  echo -e "$Green Cleaning Dependencies $Color_Off"
+  brew cleanup -n
+  read -p "$(echo -e "$Green These are all the old formulas that would be clean. Would you like to continue? (y/n): $Color_Off")" uinput
+  if [ $uinput == "y" ] || [ $uinput == "Y" ] || [ $uinput == "yes" ]; then
+    brew cleanup
+  fi
 }
 
 # Installs general set of packages
 install_basic () {
   clear
-  echo -e "$Green Starting Install of Applications... $Color_Off"
-  brew_cask_install google-chrome
-  brew_cask_install firefox
-  brew_cask_install iterm2
-  brew_cask_install atom
-  brew_cask_install adobe-creative-cloud
-  brew_cask_install telegram
-  brew_cask_install spotify
-  brew_cask_install vlc
-  brew_cask_install sequel-pro 
-
-  # Prgramming Languages
-  clear
-  echo -e "$Green Starting Install of Programming Languages... $Color_Off"
-  brew_install "ruby"
-  brew_install "python2"
-  brew_install "python3"
-  brew_cask_install "java"
-
-  # Package Managers
-  clear
-  echo -e "$Green Starting Install of Package Managers... $Color_Off"
-  brew_install "git"
-  brew_install "yarn"
-  brew_install "node"
-
-  # Databases
-  echo -e "$Green Starting Install of Package Managers... $Color_Off"
-  brew_install "mysql"
-  brew tap homebrew/services 
-  brew services start mysql 
-  brew_install "postgresql"
-  brew_install "mongodb"
-
+  echo -e "$GREEN Starting Basic Install...$Color_Off"
+  for formula in "${LBREWB[@]}"; do
+    brew_install $formula
+  done
+  for apt in "${LAPTB[@]}"; do
+    apt_install $apt
+  done
+  brew_clean
+  echo -e "$GREEN Done $Color_Off"
+  exit
 }
 
 # Installs via config file
 install_custom () {
-  echo "Custom Install"
-  . $CONFIG
-  load_configs
-  LENGTH=$(cat $CONFIG | jq '.brew .formulas' | jq 'length')
-  for (( k = 0; k < $LENGTH; k++ )); do
-    brew_install ${BREW[$k]}
+  clear
+  echo -e "$GREEN Starting Custom Install...$Color_Off"
+  for formula in "${LBREWC[@]}"; do
+    brew_install $formula
   done
-  
-  LENGTH=$(cat $CONFIG | jq '.cask .applications' | jq 'length')
-  for (( l = 0; l < $LENGTH; l++ )); do
-    brew_install ${CASK[$l]}
+  for apt in "${LAPTC[@]}"; do
+    apt_install $apt
   done
-
-
+  brew_clean
+  echo -e "$GREEN Done $Color_Off"
+  exit
 }
 
 # Installs Basic Brew Utilities
@@ -185,31 +187,66 @@ install_brew_utils () {
   brew_install "jq"
 }
 
+# Checks if the user already has required formulas
+check_depend () {
+  if [ $1 == "1" ]; then
+    echo -e "Checking for dependencies..."
+    for u in "${REQUIRED_UTILS[@]}"; do
+      if [ -f "/usr/local/bin/$u" ] || [ -f "/usr/bin/$u" ]; then
+        echo -e "$GREEN $u - Installed $Color_Off"
+      else
+        echo -e "$RED $u - Not Installed $Color_Off"
+        brew_install $u
+      fi
+    done
+  else
+    for u in "${REQUIRED_UTILS[@]}"; do
+      brew_install $u
+    done
+  fi
+
+}
+
+prompt () {
+  clear
+  while :
+  do
+    echo -e "Basic\tInstall\t\t(b)\nCustom\tInstall\t\t(c)\nUnistall Homebrew\t(u)\nQuit\t\t\t(exit)"
+    read -p "What would you like to do? (PRESS ENTER): " REPLY
+    case $REPLY in
+      b) install_basic;;
+      c) install_custom;;
+      u) echo -e "Uninstalling Homebrew";;
+      exit) exit;;
+      *) echo -e "$(clear) $RED Invalid Choice - Try again $Color_Off";;
+    esac
+  done
+}
 
 startup () {
   clear
   echo -e "$Green Starting Setup... $Color_Off"
-  install_prerequisites
-  install_brew_utils
-  echo 'What would you like to proceed with?
-Basic   Install   (b)
-Custom  Install   (c)
-Exit              (exit)'
-  read -p "$USER: " installchoice
-
-  if [ $installchoice == "b" ]; then
-    install_basic
-  elif [ $installchoice == "c" ]; then
-    install_custom
-  elif [ $installchoice == "exit" ]; then
-    clear
-    exit
-  else
-    echo -e "$Red Invalid Choice $Color_Off"
+  echo -e "$Green Checking for homebrew... $Color_Off"
+  sleep 1
+  # Checks if homebrew is installed
+  if [ -f "/usr/local/bin/brew" ] || [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
+    echo -e "$Green Instance of brew is already installed. $Color_Off"
+    echo -e "$Green Updating/Installing formulas required for script... $Color_Off"
     sleep 1
-    startup
+    check_depend 1
+    . $DATA      # Imports helper functions
+    brew_update
+    fetch_data
+  else
+    echo -e "$Green Instance of homebrew not found. Installing...$Color_Off"
+    sleep 1
+    install_prerequisites
+    install_brew
+    check_depend 0
+    . $DATA      # Imports helper functions
+    fetch_data
   fi
-  # install_basic
+  prompt
 }
 
 startup

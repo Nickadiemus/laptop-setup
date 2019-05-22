@@ -1,13 +1,23 @@
 {
-  "cask":{
-    "applications":["google-chrome", "firefox", "iterm2", "atom"]
+  "mac":{
+    "custom":{
+      "applications":["google-chrome", "firefox", "iterm2", "atom"],
+      "formulas":["ruby", "python2", "python3"]
+    },
+    "basic":{
+      "applications": ["google-chrome", "firefox", "iterm2", "atom", "adobe-creative-cloud", "telegram", "spotify", "vlc", "sequel-pro", "java"],
+      "formulas": ["ruby", "python2", "python3", "git", "yarn", "node", "mysql", "postgresql", "mongodb"]
+    }
   },
-  "brew":{
-    "formulas":["ruby", "python2", "python3", "java"]
-  },
-  "basic":{
-    "applications": ["google-chrome", "firefox", "iterm2", "atom", "adobe-creative-cloud", "telegram", "spotify", "vlc", "sequel-pro", "java"],
-    "formulas": ["ruby", "python2", "python3", "git", "yarn", "node", "mysql", "postgresql", "mongodb"]
+  "linux":{
+    "custom":{
+      "apt":["google-chrome-stable", "firefox"],
+      "formulas":["ruby", "python2", "python3", "java"]
+    },
+    "basic":{
+      "applications": ["default-jdk", "default-jre", "google-chrome", "firefox", "atom4", "vlc"],
+      "formulas": ["ruby", "python2", "python3", "git", "yarn", "node", "mysql", "postgresql", "mongodb"]
+    }
   },
   "utils": ["cask","wget","nmap"]
 }

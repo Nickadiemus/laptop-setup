@@ -38,7 +38,7 @@ brew_install () {
 # Helper function for cask installs
 brew_cask_install () {
   echo "$Purple Installing $1...$Color_Off"
-  brew cask install $1
+  sudo apt install $1
 }
 
 # Installs Prerequisites for setup
@@ -59,11 +59,11 @@ install_brew () {
 install_basic () {
   clear
   echo "$GREEN Starting Basic Install...$Color_Off"
-  for cask in "${CASKB[@]}"; do
+  for cask in "${MCASKB[@]}"; do
     brew_cask_install $cask
   done
 
-  for formula in "${BREWB[@]}"; do
+  for formula in "${MBREWB[@]}"; do
     brew_install $formula
   done
   brew_clean
@@ -76,11 +76,11 @@ install_custom () {
   clear
   load_custom_data
   echo "$GREEN Starting Custom Install...$Color_Off"
-  for cask in "${CASKC[@]}"; do
+  for cask in "${MCASKC[@]}"; do
     brew_cask_install $cask
   done
 
-  for formula in "${BREWC[@]}"; do
+  for formula in "${MBREWC[@]}"; do
     brew_install $formula
   done
   clean_brew
